@@ -28,6 +28,9 @@ from The Open Group.
 
 /* xwud - marginally useful raster image undumper */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <X11/Xos.h>
 #include <X11/Xlib.h>
@@ -85,7 +88,7 @@ usage(const char *errmsg)
             " [-in <file>] [-noclick] [-geometry <geom>] [-display <display>]\n"
  "            [-new] [-std <maptype>] [-raw] [-vis <vis-type-or-id>]\n"
  "            [-help] [-rv] [-plane <number>] [-fg <color>] [-bg <color>]\n"
- "            [-scale]\n"
+ "            [-scale] [-dumpheader] [-version]\n"
         );
     exit(1);
 }
@@ -235,6 +238,10 @@ main(int argc, char *argv[])
 	    if (++i >= argc) usage("-vis requires an argument");
 	    vis = argv[i];
 	    continue;
+	}
+	if (strcmp(argv[i], "-version") == 0) {
+	    puts(PACKAGE_STRING);
+	    exit(0);
 	}
 	fprintf (stderr, "%s: unrecognized argument '%s'\n\n",
 		 progname, argv[i]);
