@@ -46,7 +46,6 @@ static int split;
 
 static char *progname;
 
-static void usage(void);
 static Bool Read(char *ptr, int size, int nitems, FILE *stream);
 static void putImage(Display *dpy, Window image_win, GC gc, 
 		     XImage *out_image, int x, int y, int w, int h);
@@ -75,13 +74,19 @@ static void _swapshort(char *bp, unsigned int n);
 static void _swaplong(char *bp, unsigned int n);
 static void DumpHeader(const XWDFileHeader *header, const char *win_name);
 
-static void
-usage(void)
+static void _X_NORETURN _X_COLD
+usage(const char *errmsg)
 {
-    fprintf(stderr, "usage: %s [-in <file>] [-noclick] [-geometry <geom>] [-display <display>]\n", progname);
-    fprintf(stderr, "            [-new] [-std <maptype>] [-raw] [-vis <vis-type-or-id>]\n");
-    fprintf(stderr, "            [-help] [-rv] [-plane <number>] [-fg <color>] [-bg <color>]\n");
-    fprintf(stderr, "            [-scale]\n");
+    if (errmsg != NULL)
+        fprintf (stderr, "%s: %s\n\n", progname, errmsg);
+
+    fprintf(stderr, "usage: %s %s",
+            progname,
+            " [-in <file>] [-noclick] [-geometry <geom>] [-display <display>]\n"
+ "            [-new] [-std <maptype>] [-raw] [-vis <vis-type-or-id>]\n"
+ "            [-help] [-rv] [-plane <number>] [-fg <color>] [-bg <color>]\n"
+ "            [-scale]\n"
+        );
     exit(1);
 }
 
@@ -153,12 +158,12 @@ main(int argc, char *argv[])
 
     for (i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-bg") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-bg requires an argument");
 	    bgname = argv[i];
 	    continue;
 	}
 	if (strcmp(argv[i], "-display") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-display requires an argument");
 	    display_name = argv[i];
 	    continue;
 	}
@@ -167,20 +172,20 @@ main(int argc, char *argv[])
 	    continue;
 	}
 	if (strcmp(argv[i], "-fg") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-fg requires an argument");
 	    fgname = argv[i];
 	    continue;
 	}
 	if (strcmp(argv[i], "-geometry") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-geometry requires an argument");
 	    geom = argv[i];
 	    continue;
 	}
 	if (strcmp(argv[i], "-help") == 0) {
-	    usage();
+	    usage(NULL);
 	}
 	if (strcmp(argv[i], "-in") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-in requires an argument");
 	    file_name = argv[i];
 	    continue;
 	}
@@ -190,7 +195,7 @@ main(int argc, char *argv[])
 	}
 	if (strcmp(argv[i], "-new") == 0) {
 	    newmap = True;
-	    if (std) usage();
+	    if (std) usage("-new cannot be specified with -std");
 	    continue;
 	}
 	if (strcmp(argv[i], "-noclick") == 0) {
@@ -198,13 +203,13 @@ main(int argc, char *argv[])
 	    continue;
 	}
 	if (strcmp(argv[i], "-plane") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-plane requires an argument");
 	    plane = atoi(argv[i]);
 	    continue;
 	}
 	if (strcmp(argv[i], "-raw") == 0) {
 	    rawbits = True;
-	    if (std) usage();
+	    if (std) usage("-new cannot be specified with -std");
 	    continue;
 	}
 	if (strcmp(argv[i], "-rv") == 0) {
@@ -220,17 +225,20 @@ main(int argc, char *argv[])
 	    continue;
 	}
 	if (strcmp(argv[i], "-std") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-std requires an argument");
 	    std = argv[i];
-	    if (newmap || rawbits) usage();
+	    if (newmap || rawbits)
+                usage("-std cannot be specified with -raw or -new");
 	    continue;
 	}
 	if (strcmp(argv[i], "-vis") == 0) {
-	    if (++i >= argc) usage();
+	    if (++i >= argc) usage("-vis requires an argument");
 	    vis = argv[i];
 	    continue;
 	}
-	usage();
+	fprintf (stderr, "%s: unrecognized argument '%s'\n\n",
+		 progname, argv[i]);
+	usage(NULL);
     }
     
     if (file_name) {
