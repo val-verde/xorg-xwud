@@ -70,7 +70,7 @@ static void Do_Direct(Display *dpy, XWDFileHeader *header, Colormap *colormap,
 		      int ncolors, XColor *colors, 
 		      XImage *in_image, XImage *out_image, XVisualInfo *vinfo);
 static unsigned int Image_Size(XImage *image);
-static void Error(char *string) _X_NORETURN;
+static void Error(const char *string) _X_NORETURN;
 static void _swapshort(char *bp, unsigned int n);
 static void _swaplong(char *bp, unsigned int n);
 static void DumpHeader(const XWDFileHeader *header, const char *win_name);
@@ -1144,7 +1144,7 @@ Image_Size(XImage *image)
 }
 
 static void
-Error(char *string)
+Error(const char *string)
 {
 	fprintf(stderr, "xwud: Error => %s\n", string);
 	if (errno != 0) {
